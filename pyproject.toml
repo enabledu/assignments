@@ -1,0 +1,39 @@
+[tool.isort]
+profile = "black"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = "--ignore=test_build.py"
+
+# project’s core metadata
+[project]
+name = "assignments"
+authors = [
+    { name = "w7w7", email = "w7w7" },
+]
+description = ""
+readme = "README.md"
+# This clearly delineates which metadata is purposefully unspecified and expected to stay unspecified
+# compared to being provided via tooling later on.
+dynamic = ["version"]
+classifiers = []
+requires-python = ">=3.10"
+dependencies = []
+
+[project.urls]
+Documentation = ""
+
+[tool.ruff]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    # "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
