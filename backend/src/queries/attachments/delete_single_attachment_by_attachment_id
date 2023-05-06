@@ -1,0 +1,2 @@
+delete Attachment
+filter .id = <uuid>$attachment_id

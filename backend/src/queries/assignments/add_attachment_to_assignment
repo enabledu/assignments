@@ -1,0 +1,9 @@
+update Assignment
+filter .id = <uuid>$assignment_id
+set {
+    attachments += (
+      insert Attachment {
+        file := <bytes>$file
+      }
+    )
+}

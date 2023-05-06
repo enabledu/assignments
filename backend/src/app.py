@@ -1,9 +1,9 @@
-from datetime import datetime
 from uuid import UUID
 
-from fastapi import APIRouter, Body, UploadFile
+from fastapi import APIRouter, UploadFile
 from fastapi.responses import RedirectResponse
 
+from apps.assignments.backend.src.models import AssignmentAdd, AssignmentUpdate
 
 app = APIRouter(tags=["assignments"], prefix="/assignments")
 
@@ -14,7 +14,7 @@ async def read_root():
 
 
 @app.get("/assignment/")
-async def get_assignment(assignment_id: UUID = None):
+async def get_assignment(assignment_id: UUID = None) -> BaseAssignment:
     if assignment_id == None:
         pass
         # get all the assignments from DB
@@ -25,18 +25,12 @@ async def get_assignment(assignment_id: UUID = None):
 
 
 @app.post("/assignment/add/")
-async def add_assignment(title: str = Body(),
-                         deadline: datetime = Body(None),
-                         description: str = Body(None),
-                         max_grade: int = Body(None)):
+async def add_assignment(assignment: AssignmentAdd) -> UUID:
     pass
 
 
 @app.post("/assignment/{assignment_id}/update/")
-async def update_assignment(assignment_id: UUID,
-                            title: str = Body(),
-                            description: str = Body(None),
-                            max_grade: int = Body(None)):
+async def update_assignment(assignment: AssignmentUpdate) -> UUID:
     pass
     # check if the id is valid
 

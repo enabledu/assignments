@@ -1,0 +1,21 @@
+with
+  owner := (
+    select User
+    filter .id = <uuid>$owner_id
+  ),
+  attachment := (
+    insert Attachment {
+      file := <bytes>$file
+    }
+  ),
+  work := (
+    insert Work {
+      owner := owner,
+      attachments := attachment,
+    }
+  )
+update Assignment
+filter .id = <uuid>$assignment_id
+set {
+  works += work
+}

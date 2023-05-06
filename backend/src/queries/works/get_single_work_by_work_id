@@ -1,0 +1,6 @@
+select Work {
+  owner,
+  is_submitted,
+  grade
+}
+filter .id = <uuid>$work_id
