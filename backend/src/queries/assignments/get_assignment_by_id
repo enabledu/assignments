@@ -1,7 +1,0 @@
-select Assignment {
-  owner,
-  title,
-  deadline,
-  description,
-  max_grade
-} filter .id = <uuid>$assignment_id

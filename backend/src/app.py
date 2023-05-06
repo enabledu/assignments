@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, UploadFile
 from fastapi.responses import RedirectResponse
 
-from apps.assignments.backend.src.models import AssignmentAdd, AssignmentUpdate
+from apps.assignments.backend.src.models import AssignmentAdd, AssignmentUpdate, BaseAssignment
 
 app = APIRouter(tags=["assignments"], prefix="/assignments")
 
@@ -14,14 +14,9 @@ async def read_root():
 
 
 @app.get("/assignment/")
-async def get_assignment(assignment_id: UUID = None) -> BaseAssignment:
-    if assignment_id == None:
-        pass
-        # get all the assignments from DB
-    else:
-        pass
-        # get the specific assignment
-        # if the id is not valid ...
+async def get_assignment() -> BaseAssignment:
+    pass
+    # get all the assignments from DB
 
 
 @app.post("/assignment/add/")
