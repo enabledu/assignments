@@ -7,7 +7,9 @@ module default {
         multi link attachments -> Attachment {
             on target delete allow;
         }
-        multi link works -> Work;
+        multi link works -> Work {
+            on target delete allow;
+        }
         property max_grade -> int16{default:=0; constraint min_value(0)}
     } 
 
@@ -17,11 +19,13 @@ module default {
             on target delete allow;
         }
         property is_submitted -> bool{default:=false};
-        property grade -> int16{default:=0;} # how to check if it is the default or not?
+        property grade -> int16{default:=0;} # how to check if it is the default or not
         
     }
 
     type Attachment {
+        property filename -> str;
+        property content_type -> str;
         required property file -> bytes;
     }
 }

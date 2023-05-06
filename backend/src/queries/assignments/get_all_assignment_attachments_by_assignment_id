@@ -3,5 +3,7 @@ with assignment := (
   filter .id = <uuid>$assignment_id
 )
 select assignment.attachments {
-  file
+  id,
+  filename,
+  content_type
 }

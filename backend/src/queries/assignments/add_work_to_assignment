@@ -5,6 +5,8 @@ with
   ),
   attachment := (
     insert Attachment {
+      filename := <str>$filename,
+      content_type := <str>$content_type,
       file := <bytes>$file
     }
   ),

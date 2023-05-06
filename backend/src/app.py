@@ -41,14 +41,8 @@ async def delete_assignment(assignment_id: UUID):
     # check if the id is valid
 
 
-@app.get("/assignment/{assignment_id}/work/")
-async def get_works_ids(assignment_id: UUID):
-    pass
-    # check if the id is valid
-
-
-@app.post("/assignment/{assignment_id}/work/add/")
-async def submit_work(assignment_id: UUID):
+@app.get("/assignment/{assignment_id}/works/")
+async def get_all_assignment_works(assignment_id: UUID):
     pass
     # check if the id is valid
 
@@ -64,15 +58,8 @@ async def get_assignment_attachment(attachment_id: UUID):
     pass
     # check if the id is valid
 
-
-@app.post("/assignment/{assignment_id}/attachment/add/")
-async def add_assignment_attachment(assignment_id: UUID):
-    pass
-    # check if the id is valid
-
-
-@app.delete("/assignment/attachment/{attachment_id}/delete/")
-async def delete_assignment_attachment(attachment_id: UUID):
+@app.post("assignment/{assignment_id}/work/attachment")
+async def add_attachment_to_work_on_assignment(assignment_id: UUID):
     pass
     # check if the id is valid
 
@@ -95,31 +82,18 @@ async def get_all_work_attachments(attachment_id: UUID):
     # check if the id is valid
 
 
+@app.post("/work/{work_id}/submit/")
+async def submit_work(assignment_id: UUID):
+    pass
+    # check if the id is valid
+
 @app.post("/work/{work_id}/unsubmit/")
 async def unsubmit_work(work_id: UUID):
     pass
     # check if the id is valid
 
 
-@app.post("/work/{work_id}/attachment/add/")
-async def add_work_attachment(work_id: UUID):
-    pass
-    # check if the id is valid
-
-
-@app.delete("/work/attachment/{attachment_id}/delete/")
-async def delete_attachment(attachment_id: UUID):
-    pass
-    # check if the id is valid
-
-
-@app.post("/work/{work_id}/grade/add/")
-async def add_work_grade(work_id: UUID):
-    pass
-    # check if the id is valid
-
-
-@app.post("/work/{work_id}/grade/update/")
+@app.post("/work/{work_id}/grade")
 async def update_work_grade(work_id: UUID):
     pass
     # check if the id is valid
