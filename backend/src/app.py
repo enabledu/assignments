@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 from fastapi.responses import RedirectResponse
 
-from apps.assignments.backend.src.routers.assignment import assignment_router
-from apps.assignments.backend.src.routers.attachment import attachment_router
-from apps.assignments.backend.src.routers.work import work_router
+from assignments.backend.src.routers.assignment import assignment_router
+from assignments.backend.src.routers.attachment import attachment_router
+from assignments.backend.src.routers.work import work_router
 
 app = APIRouter(tags=["assignments"], prefix="/assignments")
 

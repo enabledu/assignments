@@ -2,7 +2,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from apps.enabled.backend.src.database import get_client
+from enabled.backend.src.database import get_client
+from assignments.backend.src import queries
 
 attachment_router = APIRouter(prefix="/attachment")
 

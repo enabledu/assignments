@@ -2,22 +2,22 @@ from uuid import UUID
 
 from fastapi import UploadFile, APIRouter, Depends
 
-from apps.assignments.backend.src.models import Assignment, BaseAssignment, Attachment, Work
-from apps.enabled.backend.src.database import get_client
+from assignments.backend.src.models import Assignment, BaseAssignment, Attachment, Work
+from enabled.backend.src.database import get_client
+from assignments.backend.src import queries
 
 assignment_router = APIRouter(prefix="/assignment")
 
 
 @assignment_router.get("/assignment/")
 async def get_all_assignments(client=Depends(get_client)) -> list[Assignment]:
-    pass
-    # get all the assignments from DB
+    return await queries.get_all_assignments(client)
 
 
 @assignment_router.post("/assignment/add/")
 async def add_assignment(assignment: BaseAssignment,
                          client=Depends(get_client)) -> UUID:
-    pass
+    return await queries.add_assignment(client, **BaseAssignment.dict())
 
 
 @assignment_router.post("/assignment/{assignment_id}/edit/")
@@ -32,7 +32,9 @@ async def edit_assignment(assignment_id: UUID,
 async def delete_assignment(assignment_id: UUID,
                             client=Depends(get_client)) -> None:
     pass
-    # check if the id is valid
+    # async for tx in client.transaction():
+    #     async with tx:
+    #         await tx.execute("INSERT User {name := 'Don'}")
 
 
 @assignment_router.get("/assignment/{assignment_id}/attachments/")

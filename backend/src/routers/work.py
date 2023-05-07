@@ -2,8 +2,9 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from apps.assignments.backend.src.models import Attachment
-from apps.enabled.backend.src.database import get_client
+from assignments.backend.src.models import Attachment
+from enabled.backend.src.database import get_client
+from assignments.backend.src import queries
 
 work_router = APIRouter(prefix="/work")
 
