@@ -15,9 +15,12 @@ with
       owner := owner,
       attachments := attachment,
     }
+  ),
+  assignment := (
+    update Assignment
+    filter .id = <uuid>$assignment_id
+    set {
+      works += work
+    }
   )
-update Assignment
-filter .id = <uuid>$assignment_id
-set {
-  works += work
-}
+select attachment

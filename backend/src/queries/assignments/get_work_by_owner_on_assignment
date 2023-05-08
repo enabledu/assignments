@@ -1,0 +1,12 @@
+with
+  owner := (
+    select User
+    filter .id = <uuid>$owner_id
+  ),
+  assignment := (
+    select owner.<owner[is Work].<works[is Assignment]
+    filter .id = <uuid>$assignment_id
+  )
+select assignment.works
+filter .owner=owner
+limit 1

@@ -71,20 +71,25 @@ async def add_attachment_to_work(
     filename: str,
     content_type: str,
     file: bytes,
-) -> WorkID:
+) -> AttachmentID:
     return await executor.query_single(
         """\
-        update Work
-        filter .id = <uuid>$work_id
-        set {
-            attachments += (
-              insert Attachment {
+        with
+          attachment := (
+            insert Attachment {
                 filename := <str>$filename,
                 content_type := <str>$content_type,
                 file := <bytes>$file
               }
-            )
-        }\
+          ),
+          work := (
+            update Work
+            filter .id = <uuid>$work_id
+            set {
+                attachments += attachment
+            }
+          )
+        select attachment
         """,
         work_id=work_id,
         filename=filename,
@@ -101,7 +106,7 @@ async def add_work_to_assignment(
     content_type: str,
     file: bytes,
     assignment_id: UUID,
-) -> AssignmentID:
+) -> AttachmentID:
     return await executor.query_single(
         """\
         with
@@ -121,12 +126,15 @@ async def add_work_to_assignment(
               owner := owner,
               attachments := attachment,
             }
+          ),
+          assignment := (
+            update Assignment
+            filter .id = <uuid>$assignment_id
+            set {
+              works += work
+            }
           )
-        update Assignment
-        filter .id = <uuid>$assignment_id
-        set {
-          works += work
-        }\
+        select attachment
         """,
         owner_id=owner_id,
         filename=filename,
@@ -206,8 +214,30 @@ async def delete_assignment(
 ) -> AssignmentID:
     return await executor.query_single(
         """\
-        delete Assignment
-        filter .id = <uuid>$assignment_id\
+        with
+          target_assignment := (
+            select Assignment
+            filter .id = <uuid>$assignment_id
+          ),
+          works_attachments := (
+            for attachment in target_assignment.works.attachments
+            union (
+              delete attachment
+            )
+          ),
+          works := (
+            for work in target_assignment.works
+            union (
+              delete work
+            )
+          ),
+          assignment_attachments := (
+            for attachment in target_assignment.attachments
+            union (
+              delete attachment
+            )
+          )
+        delete target_assignment
         """,
         assignment_id=assignment_id,
     )
@@ -394,6 +424,32 @@ async def get_work(
         filter .id = <uuid>$work_id
         """,
         work_id=work_id,
+    )
+
+
+async def get_work_by_owner_on_assignment(
+    executor: edgedb.AsyncIOExecutor,
+    *,
+    assignment_id: UUID,
+    owner_id: UUID
+) -> WorkID:
+    return await executor.query_single(
+        """\
+        with
+          owner := (
+            select User
+            filter .id = <uuid>$owner_id
+          ),
+          assignment := (
+            select owner.<owner[is Work].<works[is Assignment]
+            filter .id = <uuid>$assignment_id
+          )
+        select assignment.works
+        filter .owner=owner
+        limit 1
+        """,
+        assignment_id=assignment_id,
+        owner_id=owner_id
     )
 
 
