@@ -120,9 +120,8 @@ async def add_attachment_to_work_on_assignment(assignment_id: UUID,
         raise HTTPException(status_code=404, detail="Assignment NOT found")
     else:
         file = await attachment.read()
-        work = queries.get_work_by_owner_on_assignment(client, owner_id=user.id, assignment_id=assignment_id)
-        print(str(work))
-        if len(work) == 0:
+        work = await queries.get_work_by_owner_on_assignment(client, owner_id=user.id, assignment_id=assignment_id)
+        if not work:
             return await queries.add_work_to_assignment(client,
                                                         owner_id=user.id,
                                                         assignment_id=assignment_id,
