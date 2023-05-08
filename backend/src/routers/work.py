@@ -59,6 +59,7 @@ async def update_work_grade(work_id: UUID,
                             new_grade: int,
                             user=Depends(current_active_user),
                             client=Depends(get_client)) -> WorkID:
+    # TODO: find a better way to update the grade with more efficient queries.
     assignment = await queries.get_assignment_of_work(client, work_id=work_id)
     if not assignment:
         raise HTTPException(status_code=404, detail="Work NOT found")
