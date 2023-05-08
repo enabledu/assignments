@@ -3,17 +3,14 @@ import datetime
 import edgedb
 from uuid import UUID
 
-from assignments.backend.src.models import Assignment, Attachment, Work, AttachmentFile, AssignmentID, WorkID, AttachmentID
+from assignments.backend.src.models import Assignment, Attachment, Work, AttachmentFile, AssignmentID, WorkID, AttachmentID, OwnerID
 
 
 async def add_assignment(
     executor: edgedb.AsyncIOExecutor,
     *,
     owner_id: UUID,
-    title: str,
-    deadline: datetime.datetime,
-    description: str,
-    max_grade: int,
+    **kwargs
 ) -> AssignmentID:
     return await executor.query_single(
         """\
@@ -23,16 +20,13 @@ async def add_assignment(
             filter .id = <uuid>$owner_id
           ),
           title := <str>$title,
-          deadline := <datetime>$deadline,
-          description := <str>$description,
-          max_grade := <int16>$max_grade,
-        }\
+          deadline := <optional datetime>$deadline,
+          description := <optional str>$description,
+          max_grade := <optional int16>$max_grade,
+        }
         """,
         owner_id=owner_id,
-        title=title,
-        deadline=deadline,
-        description=description,
-        max_grade=max_grade,
+        **kwargs
     )
 
 
@@ -43,20 +37,25 @@ async def add_attachment_to_assignment(
     filename: str,
     content_type: str,
     file: bytes,
-) -> AssignmentID:
+) -> AttachmentID:
     return await executor.query_single(
         """\
-        update Assignment
-        filter .id = <uuid>$assignment_id
-        set {
-            attachments += (
-              insert Attachment {
+        with
+        attachment := (
+          insert Attachment {
                 filename := <str>$filename,
                 content_type := <str>$content_type,
                 file := <bytes>$file
               }
-            )
-        }\
+        ),
+        updated_assignment := (
+          update Assignment
+          filter .id = <uuid>$assignment_id
+          set {
+            attachments += attachment
+          }
+        )
+        select attachment
         """,
         assignment_id=assignment_id,
         filename=filename,
@@ -329,6 +328,43 @@ async def get_assignment(
     )
 
 
+async def get_assignment_of_work(
+    executor: edgedb.AsyncIOExecutor,
+    *,
+    work_id: UUID,
+) -> AssignmentID:
+    return await executor.query_single(
+        """\
+        with target_work := (
+          select Work
+          filter .id = <uuid>$work_id
+        )
+        select target_work.<works[is Assignment] {
+          id,
+          owner
+        } limit 1
+        """,
+        work_id=work_id,
+    )
+
+
+async def get_assignment_owner(
+    executor: edgedb.AsyncIOExecutor,
+    *,
+    assignment_id: UUID,
+) -> OwnerID:
+    return await executor.query_single(
+        """\
+        with target_assignment := (
+          select Assignment
+          filter .id = <uuid>$assignment_id
+        )
+        select target_assignment.owner
+        """,
+        assignment_id=assignment_id,
+    )
+
+
 async def get_attachment(
     executor: edgedb.AsyncIOExecutor,
     *,
@@ -341,6 +377,23 @@ async def get_attachment(
         } filter .id = <uuid>$attachment_id\
         """,
         attachment_id=attachment_id,
+    )
+
+
+async def get_work(
+    executor: edgedb.AsyncIOExecutor,
+    *,
+    work_id: UUID,
+):
+    return await executor.query_single(
+        """\
+        select Work {
+          id,
+          owner
+        }
+        filter .id = <uuid>$work_id
+        """,
+        work_id=work_id,
     )
 
 
@@ -401,25 +454,19 @@ async def update_assignment(
     executor: edgedb.AsyncIOExecutor,
     *,
     assignment_id: UUID,
-    title: str,
-    deadline: datetime.datetime,
-    description: str,
-    max_grade: int,
+    **kwargs
 ) -> AssignmentID:
     return await executor.query_single(
         """\
         update Assignment
         filter .id = <uuid>$assignment_id
         set {
-          title := <str>$title,
-          deadline := <datetime>$deadline,
-          description := <str>$description,
-          max_grade := <int16>$max_grade,
-        }\
+          title := <optional str>$title,
+          deadline := <optional datetime>$deadline,
+          description := <optional str>$description,
+          max_grade := <optional int16>$max_grade,
+        }
         """,
         assignment_id=assignment_id,
-        title=title,
-        deadline=deadline,
-        description=description,
-        max_grade=max_grade,
+        **kwargs
     )

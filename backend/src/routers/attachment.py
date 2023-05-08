@@ -23,7 +23,8 @@ async def get_attachment(attachment_id: UUID,
         raise HTTPException(status_code=404, detail="Attachment NOT found")
 
 
-@attachment_router.delete("/{attachment_id}/delete", responses={404: {"model": ErrorModel}})
+@attachment_router.delete("/{attachment_id}/delete",
+                          responses={404: {"model": ErrorModel}})
 async def delete_attachment(attachment_id: UUID,
                             client=Depends(get_client)) -> AttachmentID:
     result = await queries.delete_attachment(client, attachment_id=attachment_id)

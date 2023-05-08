@@ -1,8 +1,8 @@
 update Assignment
 filter .id = <uuid>$assignment_id
 set {
-  title := <str>$title,
-  deadline := <datetime>$deadline,
-  description := <str>$description,
-  max_grade := <int16>$max_grade,
+  title := <optional str>$title,
+  deadline := <optional datetime>$deadline,
+  description := <optional str>$description,
+  max_grade := <optional int16>$max_grade,
 }

@@ -4,7 +4,7 @@ insert Assignment {
     filter .id = <uuid>$owner_id
   ),
   title := <str>$title,
-  deadline := <datetime>$deadline,
-  description := <str>$description,
-  max_grade := <int16>$max_grade,
+  deadline := <optional datetime>$deadline,
+  description := <optional str>$description,
+  max_grade := <optional int16>$max_grade,
 }

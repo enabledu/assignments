@@ -8,8 +8,11 @@ class ErrorModel(BaseModel):
     detail: str
 
 
-class Owner(BaseModel):
-    id: UUID
+class OwnerID(BaseModel):
+    id:UUID
+
+
+class Owner(OwnerID):
     username: str
 
 
