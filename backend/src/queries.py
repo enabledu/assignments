@@ -1,79 +1,20 @@
 from __future__ import annotations
-import dataclasses
 import datetime
 import edgedb
-import uuid
+from uuid import UUID
 
-
-class NoPydanticValidation:
-    @classmethod
-    def __get_validators__(cls):
-        from pydantic.dataclasses import dataclass as pydantic_dataclass
-        pydantic_dataclass(cls)
-        cls.__pydantic_model__.__get_validators__ = lambda: []
-        return []
-
-
-@dataclasses.dataclass
-class AddAssignmentResult(NoPydanticValidation):
-    id: uuid.UUID
-
-
-@dataclasses.dataclass
-class GetAllAnswersResultAuthor(NoPydanticValidation):
-    id: uuid.UUID
-
-
-@dataclasses.dataclass
-class AddAttachmentToWorkResult(NoPydanticValidation):
-    id: uuid.UUID
-
-
-@dataclasses.dataclass
-class DeleteAllAssignmentAttachmentsResult(NoPydanticValidation):
-    id: uuid.UUID
-
-
-@dataclasses.dataclass
-class GetAllAssignmentAttachmentsResult(NoPydanticValidation):
-    id: uuid.UUID
-    filename: str | None
-    content_type: str | None
-
-
-@dataclasses.dataclass
-class GetAllAssignmentWorksResult(NoPydanticValidation):
-    id: uuid.UUID
-    owner: GetAllAnswersResultAuthor
-    is_submitted: bool | None
-    grade: int | None
-
-
-@dataclasses.dataclass
-class GetAllAssignmentsResult(NoPydanticValidation):
-    id: uuid.UUID
-    owner: GetAllAnswersResultAuthor
-    title: str
-    deadline: datetime.datetime | None
-    description: str | None
-    max_grade: int | None
-
-
-@dataclasses.dataclass
-class GetAttachmentResult(NoPydanticValidation):
-    id: uuid.UUID
-    file: bytes
+from assignments.backend.src.models import Assignment, Attachment, Work, AttachmentFile, AssignmentID, WorkID, AttachmentID
 
 
 async def add_assignment(
     executor: edgedb.AsyncIOExecutor,
     *,
-    owner_id: uuid.UUID,
+    owner_id: UUID,
     title: str,
     deadline: datetime.datetime,
     description: str,
     max_grade: int,
-) -> AddAssignmentResult:
+) -> AssignmentID:
     return await executor.query_single(
         """\
         insert Assignment {
@@ -98,11 +39,11 @@ async def add_assignment(
 async def add_attachment_to_assignment(
     executor: edgedb.AsyncIOExecutor,
     *,
-    assignment_id: uuid.UUID,
+    assignment_id: UUID,
     filename: str,
     content_type: str,
     file: bytes,
-) -> AddAssignmentResult | None:
+) -> AssignmentID:
     return await executor.query_single(
         """\
         update Assignment
@@ -127,11 +68,11 @@ async def add_attachment_to_assignment(
 async def add_attachment_to_work(
     executor: edgedb.AsyncIOExecutor,
     *,
-    work_id: uuid.UUID,
+    work_id: UUID,
     filename: str,
     content_type: str,
     file: bytes,
-) -> AddAttachmentToWorkResult | None:
+) -> WorkID:
     return await executor.query_single(
         """\
         update Work
@@ -156,12 +97,12 @@ async def add_attachment_to_work(
 async def add_work_to_assignment(
     executor: edgedb.AsyncIOExecutor,
     *,
-    owner_id: uuid.UUID,
+    owner_id: UUID,
     filename: str,
     content_type: str,
     file: bytes,
-    assignment_id: uuid.UUID,
-) -> AddAssignmentResult | None:
+    assignment_id: UUID,
+) -> AssignmentID:
     return await executor.query_single(
         """\
         with
@@ -199,8 +140,8 @@ async def add_work_to_assignment(
 async def delete_all_assignment_attachments(
     executor: edgedb.AsyncIOExecutor,
     *,
-    assignment_id: uuid.UUID,
-) -> list[DeleteAllAssignmentAttachmentsResult]:
+    assignment_id: UUID,
+) -> list[AttachmentID]:
     return await executor.query(
         """\
         with target_assignment := (
@@ -219,8 +160,8 @@ async def delete_all_assignment_attachments(
 async def delete_all_assignment_works(
     executor: edgedb.AsyncIOExecutor,
     *,
-    assignment_id: uuid.UUID,
-) -> list[AddAttachmentToWorkResult]:
+    assignment_id: UUID,
+) -> list[WorkID]:
     return await executor.query(
         """\
         with target_assignment := (
@@ -239,8 +180,8 @@ async def delete_all_assignment_works(
 async def delete_all_assignment_works_attachments(
     executor: edgedb.AsyncIOExecutor,
     *,
-    assignment_id: uuid.UUID,
-) -> list[DeleteAllAssignmentAttachmentsResult]:
+    assignment_id: UUID,
+) -> list[AttachmentID]:
     return await executor.query(
         """\
         with target_assignment := (
@@ -262,8 +203,8 @@ async def delete_all_assignment_works_attachments(
 async def delete_assignment(
     executor: edgedb.AsyncIOExecutor,
     *,
-    assignment_id: uuid.UUID,
-) -> AddAssignmentResult | None:
+    assignment_id: UUID,
+) -> AssignmentID:
     return await executor.query_single(
         """\
         delete Assignment
@@ -273,11 +214,25 @@ async def delete_assignment(
     )
 
 
+async def delete_attachment(
+    executor: edgedb.AsyncIOExecutor,
+    *,
+    attachment_id: UUID,
+) -> AttachmentID:
+    return await executor.query_single(
+        """\
+        delete Attachment
+        filter .id = <uuid>$attachment_id\
+        """,
+        attachment_id=attachment_id,
+    )
+
+
 async def get_all_assignment_attachments(
     executor: edgedb.AsyncIOExecutor,
     *,
-    assignment_id: uuid.UUID,
-) -> list[GetAllAssignmentAttachmentsResult]:
+    assignment_id: UUID,
+) -> list[Attachment]:
     return await executor.query(
         """\
         with assignment := (
@@ -297,8 +252,8 @@ async def get_all_assignment_attachments(
 async def get_all_assignment_works(
     executor: edgedb.AsyncIOExecutor,
     *,
-    assignment_id: uuid.UUID,
-) -> list[GetAllAssignmentWorksResult]:
+    assignment_id: UUID,
+) -> list[Work]:
     return await executor.query(
         """\
         with assignment := (
@@ -307,7 +262,10 @@ async def get_all_assignment_works(
         )
         select assignment.works {
           id,
-          owner,
+          owner: {
+            id,
+            username
+          },
           is_submitted,
           grade
         }\
@@ -318,12 +276,15 @@ async def get_all_assignment_works(
 
 async def get_all_assignments(
     executor: edgedb.AsyncIOExecutor,
-) -> list[GetAllAssignmentsResult]:
+) -> list[Assignment]:
     return await executor.query(
         """\
         select Assignment {
           id,
-          owner,
+          owner: {
+            id,
+            username
+          },
           title,
           deadline,
           description,
@@ -336,8 +297,8 @@ async def get_all_assignments(
 async def get_all_work_attachments(
     executor: edgedb.AsyncIOExecutor,
     *,
-    work_id: uuid.UUID,
-) -> list[GetAllAssignmentAttachmentsResult]:
+    work_id: UUID,
+) -> list[Attachment]:
     return await executor.query(
         """\
         with work := (
@@ -354,11 +315,25 @@ async def get_all_work_attachments(
     )
 
 
+async def get_assignment(
+    executor: edgedb.AsyncIOExecutor,
+    *,
+    assignment_id: UUID,
+) -> AssignmentID:
+    return await executor.query_single(
+        """\
+        select Assignment
+        filter .id = <uuid>$assignment_id
+        """,
+        assignment_id=assignment_id,
+    )
+
+
 async def get_attachment(
     executor: edgedb.AsyncIOExecutor,
     *,
-    attachment_id: uuid.UUID,
-) -> GetAttachmentResult | None:
+    attachment_id: UUID,
+) -> AttachmentFile:
     return await executor.query_single(
         """\
         select Attachment {
@@ -372,9 +347,9 @@ async def get_attachment(
 async def grade_work(
     executor: edgedb.AsyncIOExecutor,
     *,
-    work_id: uuid.UUID,
+    work_id: UUID,
     grade: int,
-) -> AddAttachmentToWorkResult | None:
+) -> WorkID:
     return await executor.query_single(
         """\
         update Work
@@ -391,8 +366,8 @@ async def grade_work(
 async def submit_work(
     executor: edgedb.AsyncIOExecutor,
     *,
-    work_id: uuid.UUID,
-) -> AddAttachmentToWorkResult | None:
+    work_id: UUID,
+) -> WorkID:
     return await executor.query_single(
         """\
         update Work
@@ -408,8 +383,8 @@ async def submit_work(
 async def unsubmit_work(
     executor: edgedb.AsyncIOExecutor,
     *,
-    work_id: uuid.UUID,
-) -> AddAttachmentToWorkResult | None:
+    work_id: UUID,
+) -> WorkID:
     return await executor.query_single(
         """\
         update Work
@@ -425,12 +400,12 @@ async def unsubmit_work(
 async def update_assignment(
     executor: edgedb.AsyncIOExecutor,
     *,
-    assignment_id: uuid.UUID,
+    assignment_id: UUID,
     title: str,
     deadline: datetime.datetime,
     description: str,
     max_grade: int,
-) -> AddAssignmentResult | None:
+) -> AssignmentID:
     return await executor.query_single(
         """\
         update Assignment

@@ -4,7 +4,10 @@ with assignment := (
 )
 select assignment.works {
   id,
-  owner,
+  owner {
+    id,
+    username
+  },
   is_submitted,
   grade
 }
