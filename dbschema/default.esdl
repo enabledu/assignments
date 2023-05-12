@@ -5,9 +5,11 @@ module default {
         property deadline -> datetime; # check comptability with Python datetime
         property description -> str;
         multi link attachments -> Attachment {
+            on target delete allow;
             on source delete delete target;
         }
         multi link works -> Work {
+            on target delete allow;
             on source delete delete target;
         }
         property max_grade -> int16{default:=0; constraint min_value(0)}
@@ -16,6 +18,7 @@ module default {
     type Work {
         required link owner -> User;
         multi link attachments -> Attachment {
+            on target delete allow;
             on source delete delete target;
         }
         property is_submitted -> bool{default:=false};
