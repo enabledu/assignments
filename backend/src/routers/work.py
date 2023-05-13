@@ -11,7 +11,7 @@ from enabled.backend.src.users.users import current_active_user
 work_router = APIRouter(prefix="/work")
 
 
-@work_router.get("/{work_id}/attachments/",
+@work_router.get("/{work_id}/attachment/",
                  responses={404: {"model": ErrorModel}})
 async def get_all_work_attachments(work_id: UUID,
                                    client=Depends(get_client)) -> list[Attachment]:

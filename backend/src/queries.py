@@ -391,6 +391,25 @@ async def get_attachment(
     )
 
 
+async def get_attachment_owner(
+    executor: edgedb.AsyncIOExecutor,
+    *,
+    attachment_id: UUID,
+):
+    return await executor.query_single(
+        """\
+        with attachment := (
+          select Attachment
+            filter .id = <uuid>$attachment_id
+        )
+        select attachment.<attachments[is Assignment].owner
+        union attachment.<attachments[is Work].owner
+        limit 1
+        """,
+        attachment_id=attachment_id,
+    )
+
+
 async def get_work(
     executor: edgedb.AsyncIOExecutor,
     *,
@@ -422,7 +441,7 @@ async def get_work_by_owner_on_assignment(
             filter .id = <uuid>$owner_id
           ),
           assignment := (
-            select owner.<owner[is Work].<works[is Assignment]
+            select Assignment
             filter .id = <uuid>$assignment_id
           )
         select assignment.works

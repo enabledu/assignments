@@ -63,7 +63,7 @@ async def delete_assignment(assignment_id: UUID,
         return await queries.delete_assignment(client, assignment_id=assignment_id)
 
 
-@assignment_router.get("/{assignment_id}/attachments/",
+@assignment_router.get("/{assignment_id}/attachment/",
                        responses={404: {"model": ErrorModel}})
 async def get_all_assignment_attachments(assignment_id: UUID,
                                          client=Depends(get_client)) -> list[Attachment]:
@@ -97,7 +97,7 @@ async def add_attachment_to_assignment(assignment_id: UUID,
                                                           file=file)
 
 
-@assignment_router.get("/{assignment_id}/works/",
+@assignment_router.get("/{assignment_id}/work/",
                        responses={404: {"model": ErrorModel}})
 async def get_all_assignment_works(assignment_id: UUID,
                                    client=Depends(get_client)) -> list[Work]:

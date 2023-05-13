@@ -1,0 +1,7 @@
+with attachment := (
+  select Attachment
+    filter .id = <uuid>$attachment_id
+)
+select attachment.<attachments[is Assignment].owner
+union attachment.<attachments[is Work].owner
+limit 1
