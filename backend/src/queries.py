@@ -381,8 +381,11 @@ async def get_attachment(
     return await executor.query_single(
         """\
         select Attachment {
+          id,
+          filename,
+          content_type,
           file
-        } filter .id = <uuid>$attachment_id\
+        } filter .id = <uuid>$attachment_id
         """,
         attachment_id=attachment_id,
     )
