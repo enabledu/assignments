@@ -8,8 +8,6 @@ from assignments.backend.src import queries
 
 from enabled.backend.src.users.users import current_active_user
 
-from enabled.backend.src.users.db import User
-
 work_router = APIRouter(prefix="/work")
 
 
@@ -28,7 +26,7 @@ async def get_all_work_attachments(work_id: UUID,
                   responses={404: {"model": ErrorModel},
                              403: {"model": ErrorModel}})
 async def submit_work(work_id: UUID,
-                      user: User = Depends(current_active_user),
+                      user=Depends(current_active_user),
                       client=Depends(get_client)) -> WorkID:
     work = await queries.get_work(client, work_id=work_id)
     if not work:
@@ -43,7 +41,7 @@ async def submit_work(work_id: UUID,
                   responses={404: {"model": ErrorModel},
                              403: {"model": ErrorModel}})
 async def unsubmit_work(work_id: UUID,
-                        user: User = Depends(current_active_user),
+                        user=Depends(current_active_user),
                         client=Depends(get_client)) -> WorkID:
     work = await queries.get_work(client, work_id=work_id)
     if not work:
@@ -59,7 +57,7 @@ async def unsubmit_work(work_id: UUID,
                              403: {"model": ErrorModel}})
 async def update_work_grade(work_id: UUID,
                             new_grade: int,
-                            user: User = Depends(current_active_user),
+                            user=Depends(current_active_user),
                             client=Depends(get_client)) -> WorkID:
     # TODO: find a better way to update the grade with more efficient queries.
     assignment = await queries.get_assignment_of_work(client, work_id=work_id)
