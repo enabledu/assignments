@@ -9,7 +9,7 @@ class ErrorModel(BaseModel):
 
 
 class OwnerID(BaseModel):
-    id:UUID
+    id: UUID
 
 
 class Owner(OwnerID):

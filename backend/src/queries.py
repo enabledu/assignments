@@ -439,13 +439,17 @@ async def get_work_by_owner_on_assignment(
           owner := (
             select User
             filter .id = <uuid>$owner_id
-          ),
-          assignment := (
-            select Assignment
-            filter .id = <uuid>$assignment_id
           )
-        select assignment.works
-        filter .owner=owner
+        select owner.<owner[is Work] {
+          id,
+          is_submitted,
+          grade,
+          owner: {
+          id,
+          username
+          }
+        }
+        filter .<works[is Assignment].id = <uuid>$assignment_id
         limit 1
         """,
         assignment_id=assignment_id,
