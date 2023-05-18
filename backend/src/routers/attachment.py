@@ -11,6 +11,8 @@ from fastapi.responses import StreamingResponse
 
 from enabled.backend.src.users.users import current_active_user
 
+from enabled.backend.src.users.db import User
+
 attachment_router = APIRouter(prefix="/attachment")
 
 
@@ -33,7 +35,7 @@ async def get_attachment(attachment_id: UUID,
                           responses={404: {"model": ErrorModel},
                                      403: {"model": ErrorModel}})
 async def delete_attachment(attachment_id: UUID,
-                            user=Depends(current_active_user),
+                            user: User = Depends(current_active_user),
                             client=Depends(get_client)) -> AttachmentID:
     # TODO: find a better way to make sure the attachment exists
     owner = await queries.get_attachment_owner(client, attachment_id=attachment_id)

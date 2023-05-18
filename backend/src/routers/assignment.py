@@ -9,6 +9,8 @@ from assignments.backend.src import queries
 
 from enabled.backend.src.users.users import current_active_user
 
+from enabled.backend.src.users.db import User
+
 assignment_router = APIRouter(prefix="/assignment")
 
 
@@ -19,7 +21,7 @@ async def get_all_assignments(client=Depends(get_client)) -> list[Assignment]:
 
 @assignment_router.post("/add/")
 async def add_assignment(assignment: BaseAssignment,
-                         user=Depends(current_active_user),
+                         user: User = Depends(current_active_user),
                          client=Depends(get_client)) -> AssignmentID:
     return await queries.add_assignment(client, owner_id=user.id, **assignment.dict())
 
@@ -29,7 +31,7 @@ async def add_assignment(assignment: BaseAssignment,
                                    403: {"model": ErrorModel}})
 async def edit_assignment(assignment_id: UUID,
                           assignment: BaseAssignment,
-                          user=Depends(current_active_user),
+                          user: User = Depends(current_active_user),
                           client=Depends(get_client)) -> AssignmentID:
     # TODO: Find a better way to replace the additional query that gets the assignment owner.
     owner = await queries.get_assignment_owner(client, assignment_id=assignment_id)
@@ -50,7 +52,7 @@ async def edit_assignment(assignment_id: UUID,
                           responses={404: {"model": ErrorModel},
                                      403: {"model": ErrorModel}})
 async def delete_assignment(assignment_id: UUID,
-                            user=Depends(current_active_user),
+                            user: User = Depends(current_active_user),
                             client=Depends(get_client)) -> AssignmentID:
     owner = await queries.get_assignment_owner(client, assignment_id=assignment_id)
 
@@ -79,7 +81,7 @@ async def get_all_assignment_attachments(assignment_id: UUID,
                                    403: {"model": ErrorModel}})
 async def add_attachment_to_assignment(assignment_id: UUID,
                                        attachment: UploadFile,
-                                       user=Depends(current_active_user),
+                                       user: User = Depends(current_active_user),
                                        client=Depends(get_client)) -> AttachmentID:
     owner = await queries.get_assignment_owner(client, assignment_id=assignment_id)
 
@@ -100,7 +102,7 @@ async def add_attachment_to_assignment(assignment_id: UUID,
 @assignment_router.get("/{assignment_id}/work/",
                        responses={404: {"model": ErrorModel}})
 async def get_all_assignment_works(assignment_id: UUID,
-                                   client=Depends(get_client)) -> list[Work]:
+                                   client: User = Depends(get_client)) -> list[Work]:
     assignment = await queries.get_assignment(client, assignment_id=assignment_id)
     if not assignment:
         raise HTTPException(status_code=404, detail="Assignment NOT found")
@@ -112,7 +114,7 @@ async def get_all_assignment_works(assignment_id: UUID,
                         responses={404: {"model": ErrorModel}})
 async def add_attachment_to_work_on_assignment(assignment_id: UUID,
                                                attachment: UploadFile,
-                                               user=Depends(current_active_user),
+                                               user: User = Depends(current_active_user),
                                                client=Depends(get_client)) -> AttachmentID:
     # TODO: find a better way to instantiate or get the work by the user on that specific assignment
     assignment = await queries.get_assignment(client, assignment_id=assignment_id)
