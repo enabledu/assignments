@@ -139,8 +139,8 @@ async def add_attachment_to_work_on_assignment(assignment_id: UUID,
 @assignment_router.get("/{assignment_id}/work/me/",
                        responses={404: {"model": ErrorModel}})
 async def get_work_on_assignment_by_current_user(assignment_id: UUID,
-                                                  user: User = Depends(current_active_user),
-                                                  client=Depends(get_client)) -> Work | None:
+                                                 user=Depends(current_active_user),
+                                                 client=Depends(get_client)) -> Work | None:
     assignment = await queries.get_assignment(client, assignment_id=assignment_id)
     if not assignment:
         raise HTTPException(status_code=404, detail="Assignment NOT found")
