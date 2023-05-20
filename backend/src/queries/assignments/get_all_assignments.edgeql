@@ -1,6 +1,6 @@
 select Assignment {
   id,
-  owner {
+  owner: {
     id,
     username
   },
