@@ -22,9 +22,18 @@ async def get_attachment(attachment_id: UUID,
     attachment_file = await queries.get_attachment(client, attachment_id=attachment_id)
     stream = io.BytesIO(attachment_file.file)
     if attachment_file:
-        return StreamingResponse(stream,
-                                 media_type=attachment_file.content_type,
-                                 headers={"Content-Disposition": f"attachment; filename={attachment_file.filename}"})
+        try:
+            attachment_file.filename.encode('latin-1')
+        except UnicodeEncodeError:
+            return StreamingResponse(stream,
+                                     media_type=attachment_file.content_type,
+                                     headers={
+                                         "Content-Disposition": f'attachment; filename*=utf-8"{attachment_file.filename.encode()}'})
+        else:
+            return StreamingResponse(stream,
+                                     media_type=attachment_file.content_type,
+                                     headers={
+                                         "Content-Disposition": f"attachment; filename={attachment_file.filename}"})
     else:
         raise HTTPException(status_code=404, detail="Attachment NOT found")
 
