@@ -10,4 +10,4 @@ select assignment.works {
   },
   is_submitted,
   grade
-}
+} filter .is_submitted = true

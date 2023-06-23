@@ -275,7 +275,7 @@ async def get_all_assignment_works(
           },
           is_submitted,
           grade
-        }\
+        } filter .is_submitted = true\
         """,
         assignment_id=assignment_id,
     )
