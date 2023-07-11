@@ -5,7 +5,7 @@ from assignments.backend.src.routers.assignment import assignment_router
 from assignments.backend.src.routers.attachment import attachment_router
 from assignments.backend.src.routers.work import work_router
 
-app = APIRouter(tags=["assignments"], prefix="/assignments")
+app = APIRouter(prefix="/assignments")
 
 app.include_router(assignment_router)
 app.include_router(work_router)

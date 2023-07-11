@@ -8,7 +8,7 @@ from assignments.backend.src import queries
 
 from enabled.backend.src.users.users import current_active_user
 
-work_router = APIRouter(prefix="/work")
+work_router = APIRouter(tags=["assignments: work"], prefix="/work")
 
 
 @work_router.get("/{work_id}/attachment/",

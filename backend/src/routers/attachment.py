@@ -11,7 +11,7 @@ from fastapi.responses import StreamingResponse
 
 from enabled.backend.src.users.users import current_active_user
 
-attachment_router = APIRouter(prefix="/attachment")
+attachment_router = APIRouter(tags=["assignments: attachment"], prefix="/attachment")
 
 
 @attachment_router.get("/{attachment_id}/",

@@ -9,7 +9,7 @@ from assignments.backend.src import queries
 
 from enabled.backend.src.users.users import current_active_user
 
-assignment_router = APIRouter(prefix="/assignment")
+assignment_router = APIRouter(tags=["assignments: assignment"], prefix="/assignment")
 
 
 @assignment_router.get("/")
